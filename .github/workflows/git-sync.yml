@@ -1,0 +1,27 @@
+name: git sync (Upstream → Fork)
+
+on:
+  schedule:
+    # Daily at 22:30 IST ≈ 17:00 UTC (adjust to your preferred time)
+    - cron: '0 17 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # non-shallow for clean merges
+
+      - name: Upstream Sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3
+        with:
+          target_sync_branch: master
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+          upstream_sync_repo: torvalds/linux
+          upstream_sync_branch: master
