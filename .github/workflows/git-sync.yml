@@ -4,7 +4,7 @@ on:
   schedule:
     # Daily at 22:30 IST ≈ 17:00 UTC (adjust to your preferred time)
     - cron: '0 17 * * *'
-  workflow_dispatch:
+  workflow_dispatch: # ✅ Manual trigger button
 
 permissions:
   contents: write
@@ -14,14 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     name: sync with latest mainline branch
     steps:
-    # step 1: run a standard checkout action, provided by github
+      # step 1: checkout your fork (default branch)
       - name: Checkout default branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # non-shallow for clean merges
 
-    steps:
-    # step 2: run the sync action
+      # step 2: sync fork with upstream (Linus' tree)
       - name: Git Sync
         id: sync
         uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
@@ -32,11 +31,11 @@ jobs:
           upstream_sync_repo: torvalds/linux
           upstream_sync_branch: master
 
-    # step 3: display a sample message for status
-    - name: New commits found
-      if: steps.sync.outputs.has_new_commits == 'true'
-      run: echo "New commits were found"
-    
-    - name: No new commits
-      if: steps.sync.outputs.has_new_commits == 'false'
-      run: echo "No new commits."
+      # step 3: log result
+      - name: New commits found
+        if: steps.sync.outputs.has_new_commits == 'true'
+        run: echo "✅ New commits were found and synced from upstream"
+
+      - name: No new commits
+        if: steps.sync.outputs.has_new_commits == 'false'
+        run: echo "ℹ️ Fork is already up to date."
