@@ -12,16 +12,31 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    name: sync with latest mainline branch
     steps:
+    # step 1: run a standard checkout action, provided by github
       - name: Checkout default branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # non-shallow for clean merges
 
-      - name: Upstream Sync
-        uses: aormsby/Fork-Sync-With-Upstream-action@v3
+    steps:
+    # step 2: run the sync action
+      - name: Git Sync
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
         with:
           target_sync_branch: master
+          # required token same as below
           target_repo_token: ${{ secrets.GITHUB_TOKEN }}
           upstream_sync_repo: torvalds/linux
           upstream_sync_branch: master
+
+    # step 3: display a sample message for status
+    - name: New commits found
+      if: steps.sync.outputs.has_new_commits == 'true'
+      run: echo "New commits were found"
+    
+    - name: No new commits
+      if: steps.sync.outputs.has_new_commits == 'false'
+      run: echo "No new commits."
