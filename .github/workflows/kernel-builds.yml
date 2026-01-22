@@ -36,6 +36,16 @@ jobs:
             gcc-arm-linux-gnueabihf \
             gcc-riscv64-linux-gnu
 
+      - name: Install CI host tools
+        run: |
+          sudo apt install -y \
+            libelf-dev \
+            libssl-dev \
+            bc \
+            flex \
+            bison \
+            dwarves
+
       - name: Set build env
         run: |
           echo "ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
