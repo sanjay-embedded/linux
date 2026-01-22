@@ -2,9 +2,6 @@ name: Linux Kernel CI
 
 on:
   schedule:
-    - cron: '0 17 * * *'   # Daily
-  workflow_dispatch:
-  schedule:
     # Daily at 23:00 IST ≈ 17:30 UTC (adjust to your preferred time)
     - cron: '30 17 * * *'
   workflow_dispatch: # ✅ Manual trigger button
