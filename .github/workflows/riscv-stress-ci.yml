@@ -1,0 +1,68 @@
+name: Linux Kernel RISC-V CI
+
+on:
+  schedule:
+    # Daily at 18:00 IST ≈ 12:30 UTC (adjust to your preferred time)
+    - cron: '30 12 * * 1,2,5'
+  workflow_dispatch: # ✅ Manual trigger button
+
+permissions:
+  contents: read
+
+env:
+  CI_PROFILE: stress
+
+jobs:
+  kernel-build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: riscv64
+            config: defconfig
+          - arch: riscv64
+            config: randconfig
+          - arch: riscv64
+            config: allyesconfig
+          - arch: riscv64
+            config: allnoconfig
+          - arch: riscv64
+            config: allmodconfig
+
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchains
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            gcc-riscv64-linux-gnu
+
+      - name: Install CI host tools
+        run: |
+          sudo apt install -y \
+            libelf-dev \
+            libssl-dev \
+            bc \
+            flex \
+            bison \
+            dwarves
+
+      - name: Set build env
+        run: |
+          echo "ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
+          echo "CONFIG=${{ matrix.config }}" >> $GITHUB_ENV
+
+      - name: Build kernel
+        run: |
+          chmod +x .github/ci/build-kernel.sh
+          .github/ci/build-kernel.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel-${{ matrix.arch }}-${{ matrix.config }}-${{ github.run_id }}
+          retention-days: 7
+          path: out/
