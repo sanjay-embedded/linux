@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CI_PROFILE: stable
+
 jobs:
   kernel-build:
     runs-on: ubuntu-latest
