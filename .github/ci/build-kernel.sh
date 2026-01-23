@@ -16,14 +16,29 @@ echo "OUT=$KERNEL_OUT"
 # Configure
 make O="$KERNEL_OUT" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" "$CONFIG"
 
+FILTER_REGEX="error:|fatal error|undefined reference|warning:|objtool:|VMLINUX:"
+
 # Build
 make -j$(nproc) \
   O="$KERNEL_OUT" \
   ARCH="$ARCH" \
   CROSS_COMPILE="$CROSS_COMPILE" \
-  2>&1 | tee "$LOG_FILE"
+  2>&1 | tee "$LOG_FILE" | \
+  grep -Ei --color=always "$FILTER_REGEX" \
+  || true
 
+# Optional: remove headers and scripts
+rm -rf "$KERNEL_OUT"/{scripts,tools,include}
 # Modules
 make O="$KERNEL_OUT" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" \
   INSTALL_MOD_PATH="$KERNEL_OUT/modules" \
   modules_install
+
+# Pruning Build Output
+find "$KERNEL_OUT" -type f \
+  \( -name "*.o" \
+     -o -name "*.cmd" \
+     -o -name "*.a" \
+     -o -name "*.symversions" \
+     -o -name "vmlinux" \
+  \) -delete
