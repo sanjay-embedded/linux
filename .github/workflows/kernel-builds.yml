@@ -63,4 +63,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kernel-${{ matrix.arch }}-${{ matrix.config }}-${{ github.run_id }}
+          retention-days: 7
           path: out/
