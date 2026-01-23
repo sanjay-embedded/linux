@@ -43,8 +43,6 @@ make -j$(nproc) \
   grep -Ei --color=always "$FILTER_REGEX" \
   || true
 
-# Optional: remove headers and scripts
-rm -rf "$KERNEL_OUT"/{scripts,tools,include}
 # Modules
 make O="$KERNEL_OUT" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" \
   INSTALL_MOD_PATH="$KERNEL_OUT/modules" \
