@@ -104,6 +104,12 @@ modules.order
 /pacman/
 
 #
+# We don't want to ignore the following as it contains script, tool and rule for CI
+#
+!.github/
+!.github/**
+
+#
 # We don't want to ignore the following even if they are dot-files
 #
 !.clang-format
