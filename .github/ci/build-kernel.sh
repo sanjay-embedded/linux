@@ -33,7 +33,7 @@ make O="$KERNEL_OUT" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" "$CONFIG"
 
 FILTER_REGEX="error:|fatal error|undefined reference|warning:|objtool:|VMLINUX:"
 
-# Build
+# Build Kernel
 make -j$(nproc) \
   O="$KERNEL_OUT" \
   ARCH="$ARCH" \
@@ -43,7 +43,14 @@ make -j$(nproc) \
   grep -Ei --color=always "$FILTER_REGEX" \
   || true
 
-# Modules
+# Build Modules
+make -j$(nproc) \
+  O="$KERNEL_OUT" \
+  ARCH="$ARCH" \
+  CROSS_COMPILE="$CROSS_COMPILE" \
+  modules >> "$LOG_FILE"
+
+# Install Modules
 make O="$KERNEL_OUT" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" \
   INSTALL_MOD_PATH="$KERNEL_OUT/modules" \
   modules_install >> "$LOG_FILE"
