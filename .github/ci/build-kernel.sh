@@ -43,17 +43,24 @@ make -j$(nproc) \
   grep -Ei --color=always "$FILTER_REGEX" \
   || true
 
-# Build Modules
-make -j$(nproc) \
-  O="$KERNEL_OUT" \
-  ARCH="$ARCH" \
-  CROSS_COMPILE="$CROSS_COMPILE" \
-  modules >> "$LOG_FILE"
+# allyesconfig will not enable CONFIG_MODULES
+if [ "$CONFIG" != "allyesconfig" ]; then
+  # Build Modules
+  make -j$(nproc) \
+    O="$KERNEL_OUT" \
+    ARCH="$ARCH" \
+    CROSS_COMPILE="$CROSS_COMPILE" \
+    modules >> "$LOG_FILE"
 
-# Install Modules
-make O="$KERNEL_OUT" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" \
-  INSTALL_MOD_PATH="$KERNEL_OUT/modules" \
-  modules_install >> "$LOG_FILE"
+  # Install Modules
+  make O="$KERNEL_OUT" \
+    ARCH="$ARCH" \
+    CROSS_COMPILE="$CROSS_COMPILE" \
+    INSTALL_MOD_PATH="$KERNEL_OUT/modules" \
+    modules_install >> "$LOG_FILE"
+else
+  echo "No modules will be build"
+fi
 
 # Pruning Build Output
 find "$KERNEL_OUT" -type f \
