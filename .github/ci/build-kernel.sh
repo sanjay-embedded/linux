@@ -46,7 +46,7 @@ make -j$(nproc) \
 # Modules
 make O="$KERNEL_OUT" ARCH="$ARCH" CROSS_COMPILE="$CROSS_COMPILE" \
   INSTALL_MOD_PATH="$KERNEL_OUT/modules" \
-  modules_install
+  modules_install >> "$LOG_FILE"
 
 # Pruning Build Output
 find "$KERNEL_OUT" -type f \
