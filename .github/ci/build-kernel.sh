@@ -38,8 +38,7 @@ make -j$(nproc) \
   O="$KERNEL_OUT" \
   ARCH="$ARCH" \
   CROSS_COMPILE="$CROSS_COMPILE" \
-  $MAKE_FLAGS \
-  2>&1 | tee -a "$LOG_FILE"
+  $MAKE_FLAGS >> "$LOG_FILE"
 
 # Optional: post-build highlight (does not affect exit code)
 if [[ -n "$FILTER_REGEX" ]]; then
