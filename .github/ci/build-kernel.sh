@@ -39,12 +39,16 @@ make -j$(nproc) \
   ARCH="$ARCH" \
   CROSS_COMPILE="$CROSS_COMPILE" \
   $MAKE_FLAGS \
-  2>&1 | tee "$LOG_FILE" | \
-  grep -Ei --color=always "$FILTER_REGEX" \
-  || true
+  2>&1 | tee -a "$LOG_FILE"
 
-# allyesconfig will not enable CONFIG_MODULES
-if [ "$CONFIG" != "allyesconfig" ]; then
+# Optional: post-build highlight (does not affect exit code)
+if [[ -n "$FILTER_REGEX" ]]; then
+  echo "== Highlighted lines =="
+  grep -Ei --color=always "$FILTER_REGEX" "$LOG_FILE" || true
+fi
+
+# Skip modules if CONFIG_MODULES is not set to y in the actual .config
+if grep -qE '^CONFIG_MODULES=y' "$KERNEL_OUT/.config"; then
   # Build Modules
   make -j$(nproc) \
     O="$KERNEL_OUT" \
@@ -53,13 +57,15 @@ if [ "$CONFIG" != "allyesconfig" ]; then
     modules >> "$LOG_FILE"
 
   # Install Modules
-  make O="$KERNEL_OUT" \
+  make -j$(nproc) \
+    O="$KERNEL_OUT" \
     ARCH="$ARCH" \
     CROSS_COMPILE="$CROSS_COMPILE" \
     INSTALL_MOD_PATH="$KERNEL_OUT/modules" \
+    INSTALL_MOD_STRIP=1 \
     modules_install >> "$LOG_FILE"
 else
-  echo "No modules will be build"
+  echo "== Skipping modules: CONFIG_MODULES is not enabled =="
 fi
 
 # Pruning Build Output
