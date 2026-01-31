@@ -48,6 +48,7 @@ jobs:
             bc \
             flex \
             bison \
+            sparse \
             dwarves
 
       - name: Set build env
