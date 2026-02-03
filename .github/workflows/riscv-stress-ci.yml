@@ -19,15 +19,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - arch: riscv64
+          - arch: riscv
             config: defconfig
-          - arch: riscv64
+          - arch: riscv
             config: randconfig
-          - arch: riscv64
+          - arch: riscv
             config: allyesconfig
-          - arch: riscv64
+          - arch: riscv
             config: allnoconfig
-          - arch: riscv64
+          - arch: riscv
             config: allmodconfig
 
 

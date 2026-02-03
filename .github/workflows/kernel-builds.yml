@@ -23,9 +23,9 @@ jobs:
             config: defconfig
           - arch: arm64
             config: defconfig
-          - arch: riscv64
+          - arch: riscv
             config: defconfig
-          - arch: riscv64
+          - arch: riscv
             config: randconfig
 
     steps:
