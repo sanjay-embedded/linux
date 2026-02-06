@@ -47,6 +47,7 @@ jobs:
             bc \
             flex \
             bison \
+            lzop \
             dwarves
 
       - name: Set build env
