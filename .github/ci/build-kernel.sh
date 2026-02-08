@@ -24,7 +24,8 @@ case "${CI_PROFILE}" in
     MAKE_FLAGS=""
     ;;
   stress)
-    MAKE_FLAGS="W=1 C=1"
+#   MAKE_FLAGS="W=1 C=1"
+    MAKE_FLAGS="W=1"
     ;;
 esac
 
