@@ -1,4 +1,4 @@
-name: Sync Upstream and Rebase Development
+name: Sync Development
 
 on:
   schedule:
