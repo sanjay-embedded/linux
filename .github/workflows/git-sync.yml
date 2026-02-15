@@ -1,4 +1,4 @@
-name: git sync (Upstream → Fork)
+name: Sync Upstream and Rebase Development
 
 on:
   schedule:
@@ -12,30 +12,37 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    name: sync with latest mainline branch
+
     steps:
-      # step 1: checkout your fork (default branch)
-      - name: Checkout default branch
+      # step 1: checkout (default branch)
+      - name: Checkout development branch
         uses: actions/checkout@v4
         with:
+          ref: development
           fetch-depth: 0  # non-shallow for clean merges
 
-      # step 2: sync fork with upstream (Linus' tree)
-      - name: Git Sync
-        id: sync
-        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
-        with:
-          target_sync_branch: master
-          # required token same as below
-          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
-          upstream_sync_repo: torvalds/linux
-          upstream_sync_branch: master
+      - name: Configure Git identity
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
 
-      # step 3: log result
-      - name: New commits found
-        if: steps.sync.outputs.has_new_commits == 'true'
-        run: echo "✅ New commits were found and synced from upstream"
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/torvalds/linux.git || true
+          git fetch upstream
 
-      - name: No new commits
-        if: steps.sync.outputs.has_new_commits == 'false'
-        run: echo "ℹ️ Fork is already up to date."
+      # step 2: Update master (mirror)
+      - name: Sync master
+        run: |
+          git checkout master || git checkout -b master
+          git reset --hard upstream/master
+          git push origin master --force
+          echo "✅ master is now aligned with upstream"
+
+      # step 3: Rebase development on updated master
+      - name: Rebase development
+        run: |
+          git checkout development
+          git rebase master
+          git push origin development
+          echo "✅ development successfully rebased"
