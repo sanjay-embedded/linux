@@ -44,5 +44,5 @@ jobs:
         run: |
           git checkout development
           git rebase master
-          git push origin development
+          git push origin development --force
           echo "✅ development successfully rebased"
