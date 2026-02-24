@@ -1,0 +1,69 @@
+name: Kernel Static Discovery
+
+on:
+  schedule:
+    # Daily at 23:00 IST ≈ 17:30 UTC (adjust to your preferred time)
+    - cron: '30 17 * * 3,6'
+  workflow_dispatch: # ✅ Manual trigger button
+
+permissions:
+  contents: read
+
+env:
+  CI_PROFILE: stable
+  MODE: static
+
+jobs:
+  kernel-build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+          - arch: riscv
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install toolchains
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            gcc-aarch64-linux-gnu \
+            gcc-arm-linux-gnueabihf \
+            gcc-riscv64-linux-gnu
+
+      - name: Install CI host tools
+        run: |
+          sudo apt-get install -y \
+            bc bison flex \
+            libssl-dev libelf-dev \
+            build-essential \
+            clang llvm \
+            sparse \
+            coccinelle \
+            python3-sphinx \
+            texlive-latex-base \
+            texlive-fonts-recommended \
+            libxml2-dev \
+            texlive-latex-extra \
+            graphviz
+
+      - name: Set build env
+        run: |
+          echo "ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
+
+      - name: Build kernel
+        run: |
+          chmod +x .github/ci/build-mode.sh
+          .github/ci/build-mode.sh
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel-${{ matrix.arch }}-${{ github.run_id }}
+          retention-days: 2
+          path: out/
