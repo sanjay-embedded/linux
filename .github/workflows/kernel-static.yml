@@ -57,6 +57,7 @@ jobs:
       - name: Set build env
         run: |
           echo "ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
+          echo "CONFIG=${{ matrix.config }}" >> $GITHUB_ENV
 
       - name: Build kernel
         run: |
