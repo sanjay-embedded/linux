@@ -11,62 +11,150 @@ permissions:
 
 env:
   CI_PROFILE: stable
-  MODE: static
 
 jobs:
-  kernel-build:
+  # -----------------------------------------
+  # Documentation
+  # -----------------------------------------
+  static-doc:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: x86_64
-            config: defconfig
-          - arch: riscv
-            config: defconfig
+    timeout-minutes: 180
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Install toolchains
+      - name: Install heavy deps
         run: |
-          sudo apt update
-          sudo apt install -y \
-            gcc-aarch64-linux-gnu \
-            gcc-arm-linux-gnueabihf \
-            gcc-riscv64-linux-gnu
-
-      - name: Install CI host tools
-        run: |
+          sudo apt-get update
           sudo apt-get install -y \
             bc bison flex \
             libssl-dev libelf-dev \
             build-essential \
-            clang llvm \
-            sparse \
             coccinelle \
-            python3-sphinx \
-            texlive-latex-base \
-            texlive-fonts-recommended \
-            libxml2-dev \
-            texlive-latex-extra \
             graphviz
 
       - name: Set build env
         run: |
-          echo "ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
-          echo "CONFIG=${{ matrix.config }}" >> $GITHUB_ENV
+          echo "ARCH=x86_64" >> $GITHUB_ENV
+          echo "CI_STAGE=doc" >> $GITHUB_ENV
 
       - name: Build kernel
         run: |
           chmod +x .github/ci/build-mode.sh
           .github/ci/build-mode.sh
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: kernel-${{ matrix.arch }}-${{ matrix.config }}-${{ github.run_id }}
-          retention-days: 2
-          path: out/
+  # -----------------------------------------
+  # Coccicheck (Heavy)
+  # -----------------------------------------
+  static-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install heavy deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            bc bison flex \
+            libssl-dev libelf-dev \
+            build-essential \
+            python3-sphinx \
+            texlive-latex-base \
+            texlive-fonts-recommended \
+            texlive-latex-extra \
+            graphviz
+
+      - name: Set build env
+        run: |
+          echo "ARCH=x86_64" >> $GITHUB_ENV
+          echo "CI_STAGE=cocci" >> $GITHUB_ENV
+
+      - name: Build kernel
+        run: |
+          chmod +x .github/ci/build-mode.sh
+          .github/ci/build-mode.sh
+
+  # -----------------------------------------
+  # Clang
+  # -----------------------------------------
+  static-clang:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            config: defconfig
+          - arch: arm64
+            config: defconfig
+          - arch: riscv
+            config: defconfig
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang + cross
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            bc bison flex \
+            libssl-dev libelf-dev \
+            build-essential \
+            clang llvm \
+            gcc-aarch64-linux-gnu \
+            gcc-riscv64-linux-gnu
+
+      - name: Set build env
+        run: |
+          echo "ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
+          echo "CONFIG=${{ matrix.config }}" >> $GITHUB_ENV
+          echo "CI_STAGE=clang" >> $GITHUB_ENV
+
+      - name: Build kernel
+        run: |
+          chmod +x .github/ci/build-mode.sh
+          .github/ci/build-mode.sh
+
+  # -----------------------------------------
+  # kselftest
+  # -----------------------------------------
+  static-kselftest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            config: defconfig
+          - arch: arm64
+            config: defconfig
+          - arch: riscv
+            config: defconfig
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install minimal deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            bc bison flex \
+            libssl-dev libelf-dev \
+            build-essential \
+            gcc-aarch64-linux-gnu \
+            gcc-riscv64-linux-gnu
+
+      - name: Set build env
+        run: |
+          echo "ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
+          echo "CONFIG=${{ matrix.config }}" >> $GITHUB_ENV
+          echo "CI_STAGE=kselftest" >> $GITHUB_ENV
+
+      - name: Build kernel
+        run: |
+          chmod +x .github/ci/build-mode.sh
+          .github/ci/build-mode.sh
