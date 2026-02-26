@@ -2,46 +2,71 @@
 set -euo pipefail
 
 # Inputs (from CI)
-: "${ARCH:?}"
-: "${CONFIG:?}"
+: "${ARCH:?ARCH not set}"
+: "${CI_STAGE:?CI_STAGE not set}"
 
 source .github/ci/common.sh
 
-echo "==> Building kernel"
-echo "ARCH=$ARCH"
-echo "CONFIG=$CONFIG"
-echo "CROSS_COMPILE=$CROSS_COMPILE"
-echo "OUT=$KERNEL_OUT"
+echo "=================================================="
+echo " Kernel CI Stage Execution"
+echo " ARCH          : $ARCH"
+echo " CONFIG        : ${CONFIG:-defconfig}"
+echo " CI_STAGE      : $CI_STAGE"
+echo " CROSS_COMPILE : ${CROSS_COMPILE:-none}"
+echo " OUTDIR        : $KERNEL_OUT"
+echo "=================================================="
 
-case "${MODE}" in
-  static)
-    echo "Running Static Discovery Mode"
+BUILD_DIR="$KERNEL_OUT/$CI_STAGE"
+mkdir -p "$BUILD_DIR"
 
-    # -------------------------------------------------
-    # 1. HTML Documentation
-    # -------------------------------------------------
-    echo "===== htmldocs =====" | tee -a "$LOG_FILE"
-    make O="$KERNEL_OUT/htmldocs" htmldocs -j$(nproc) >> "$LOG_FILE"
+case "$CI_STAGE" in
 
-    # -------------------------------------------------
-    # 2. Clang Build (defconfig)
-    # -------------------------------------------------
-    echo "===== clang defconfig =====" | tee -a "$LOG_FILE"
-    make O="$KERNEL_OUT/$CONFIG" "$CONFIG"
-    make O="$KERNEL_OUT/$CONFIG" CC=clang -j$(nproc) >> "$LOG_FILE"
+  # -----------------------------------------
+  # 1️⃣ Documentation (htmldocs)
+  # -----------------------------------------
+  doc)
+    make O="$BUILD_DIR" "$CONFIG"
 
-    # -------------------------------------------------
-    # 3. Coccicheck (Report Mode Only)
-    # -------------------------------------------------
-    echo "===== coccicheck report =====" | tee -a "$LOG_FILE"
-    make O="$KERNEL_OUT/coccicheck" coccicheck MODE=report >> "$LOG_FILE"
+    echo "==> Building HTML documentation"
+    make -j$(nproc) O="$BUILD_DIR" htmldocs >> "$LOG_FILE"
+    ;;
 
-    # -------------------------------------------------
-    # 4. kselftest Build Only
-    # -------------------------------------------------
-    echo "===== kselftest build =====" | tee -a "$LOG_FILE"
-    make O="$KERNEL_OUT/kselftest" kselftest >> "$LOG_FILE"
+  # -----------------------------------------
+  # 2️⃣ Coccicheck (semantic analysis)
+  # -----------------------------------------
+  cocci)
+    make O="$BUILD_DIR" "$CONFIG"
 
-    echo "Static discovery completed"
+    echo "==> Running coccicheck (MODE=report)"
+    make -j$(nproc) O="$BUILD_DIR" coccicheck MODE=report >> "$LOG_FILE"
+    ;;
+
+  # -----------------------------------------
+  # 3️⃣ Clang Build
+  # -----------------------------------------
+  clang)
+    make O="$BUILD_DIR" "$CONFIG"
+
+    echo "==> Building kernel with Clang"
+    make -j$(nproc) O="$BUILD_DIR" CC=clang >> "$LOG_FILE"
+    ;;
+
+  # -----------------------------------------
+  # 4️⃣ kselftest Build
+  # -----------------------------------------
+  kselftest)
+    make O="$BUILD_DIR" "$CONFIG"
+
+    echo "==> Building kselftest"
+    make -j$(nproc) O="$BUILD_DIR" kselftest >> "$LOG_FILE"
+    ;;
+
+  *)
+    echo "ERROR: Unknown CI_STAGE=$CI_STAGE"
+    exit 1
     ;;
 esac
+
+echo "=================================================="
+echo " CI Stage '$CI_STAGE' completed successfully"
+echo "=================================================="
