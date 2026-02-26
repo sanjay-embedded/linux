@@ -2,17 +2,20 @@
 set -euo pipefail
 
 # Inputs (from CI)
-: "${ARCH:?ARCH not set}"
 : "${CI_STAGE:?CI_STAGE not set}"
+
+# Set default values
+ARCH=${ARCH:-x86_64}
+CONFIG=${CONFIG:-defconfig}
 
 source .github/ci/common.sh
 
 echo "=================================================="
 echo " Kernel CI Stage Execution"
 echo " ARCH          : $ARCH"
-echo " CONFIG        : ${CONFIG:-defconfig}"
+echo " CONFIG        : $CONFIG"
 echo " CI_STAGE      : $CI_STAGE"
-echo " CROSS_COMPILE : ${CROSS_COMPILE:-none}"
+echo " CROSS_COMPILE : $CROSS_COMPILE"
 echo " OUTDIR        : $KERNEL_OUT"
 echo "=================================================="
 
