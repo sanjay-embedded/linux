@@ -60,6 +60,32 @@ case "$CI_STAGE" in
   kselftest)
     make O="$BUILD_DIR" "$CONFIG"
 
+kselftest)
+    make O="$BUILD_DIR" "$CONFIG"
+
+    TESTS=(
+        mm
+        timers
+        seccomp
+        rseq
+        size
+        proc
+        drivers
+        iommu
+    )
+
+    for t in "${TESTS[@]}"; do
+        echo "==> Building kselftest-$t"
+        make -j"$(nproc)" O="$BUILD_DIR" kselftest-$t |& tee -a "$LOG_FILE
+
+        # status=${PIPESTATUS[0]}
+        # if [ $status -ne 0 ]; then
+        #     echo "kselftest-$t failed"
+        #     exit $status
+        # fi
+    done
+    ;;
+    
     echo "==> Building kselftest"
     make -j$(nproc) O="$BUILD_DIR" kselftest |& tee -a "$LOG_FILE"
     ;;
