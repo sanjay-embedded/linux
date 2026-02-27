@@ -60,9 +60,6 @@ case "$CI_STAGE" in
   kselftest)
     make O="$BUILD_DIR" "$CONFIG"
 
-kselftest)
-    make O="$BUILD_DIR" "$CONFIG"
-
     TESTS=(
         mm
         timers
@@ -76,7 +73,7 @@ kselftest)
 
     for t in "${TESTS[@]}"; do
         echo "==> Building kselftest-$t"
-        make -j"$(nproc)" O="$BUILD_DIR" kselftest-$t |& tee -a "$LOG_FILE
+        make -j"$(nproc)" O="$BUILD_DIR" kselftest-$t |& tee -a "$LOG_FILE"
 
         # status=${PIPESTATUS[0]}
         # if [ $status -ne 0 ]; then
@@ -84,10 +81,6 @@ kselftest)
         #     exit $status
         # fi
     done
-    ;;
-    
-    echo "==> Building kselftest"
-    make -j$(nproc) O="$BUILD_DIR" kselftest |& tee -a "$LOG_FILE"
     ;;
 
   *)
