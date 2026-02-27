@@ -30,7 +30,10 @@ jobs:
             bc bison flex \
             libssl-dev libelf-dev \
             build-essential \
-            coccinelle \
+            python3-sphinx \
+            texlive-latex-base \
+            texlive-fonts-recommended \
+            texlive-latex-extra \
             graphviz
 
       - name: Set build env
@@ -60,10 +63,7 @@ jobs:
             bc bison flex \
             libssl-dev libelf-dev \
             build-essential \
-            python3-sphinx \
-            texlive-latex-base \
-            texlive-fonts-recommended \
-            texlive-latex-extra \
+            coccinelle \
             graphviz
 
       - name: Set build env
