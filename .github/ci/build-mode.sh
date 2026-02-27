@@ -31,7 +31,7 @@ case "$CI_STAGE" in
     make O="$BUILD_DIR" "$CONFIG"
 
     echo "==> Building HTML documentation"
-    make -j$(nproc) O="$BUILD_DIR" htmldocs >> "$LOG_FILE"
+    make -j$(nproc) O="$BUILD_DIR" htmldocs |& tee -a "$LOG_FILE"
     ;;
 
   # -----------------------------------------
@@ -41,7 +41,7 @@ case "$CI_STAGE" in
     make O="$BUILD_DIR" "$CONFIG"
 
     echo "==> Running coccicheck (MODE=report)"
-    make -j$(nproc) O="$BUILD_DIR" coccicheck MODE=report >> "$LOG_FILE"
+    make -j$(nproc) O="$BUILD_DIR" coccicheck MODE=report |& tee -a "$LOG_FILE"
     ;;
 
   # -----------------------------------------
@@ -51,7 +51,7 @@ case "$CI_STAGE" in
     make O="$BUILD_DIR" "$CONFIG"
 
     echo "==> Building kernel with Clang"
-    make -j$(nproc) O="$BUILD_DIR" CC=clang >> "$LOG_FILE"
+    make -j$(nproc) O="$BUILD_DIR" CC=clang |& tee -a "$LOG_FILE"
     ;;
 
   # -----------------------------------------
@@ -61,7 +61,7 @@ case "$CI_STAGE" in
     make O="$BUILD_DIR" "$CONFIG"
 
     echo "==> Building kselftest"
-    make -j$(nproc) O="$BUILD_DIR" kselftest >> "$LOG_FILE"
+    make -j$(nproc) O="$BUILD_DIR" kselftest |& tee -a "$LOG_FILE"
     ;;
 
   *)
