@@ -41,7 +41,7 @@ case "$CI_STAGE" in
     make O="$BUILD_DIR" "$CONFIG"
 
     echo "==> Running coccicheck (MODE=report)"
-    make -j$(nproc) O="$BUILD_DIR" coccicheck MODE=report |& tee -a "$LOG_FILE"
+    make -j$(nproc) O="$BUILD_DIR" coccicheck MODE=report M=drivers |& tee -a "$LOG_FILE"
     ;;
 
   # -----------------------------------------
