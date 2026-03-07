@@ -21,7 +21,7 @@ jobs:
           ref: development
           fetch-depth: 0  # non-shallow for clean merges
 
-      - name: Configure Git identity
+      - name: Configure Git
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
@@ -31,18 +31,18 @@ jobs:
           git remote add upstream https://github.com/torvalds/linux.git || true
           git fetch upstream
 
-      # step 2: Update master (mirror)
-      - name: Sync master
+      # step 2: Update upstream-sync
+      - name: merge master
         run: |
-          git checkout master || git checkout -b master
-          git reset --hard upstream/master
-          git push origin master --force
-          echo "✅ master is now aligned with upstream"
+          git checkout upstream-sync
+          git merge --ff-only upstream/master
+          git push origin upstream-sync
+          echo "✅ upstream-sync is now aligned with master"
 
-      # step 3: Rebase development on updated master
-      - name: Rebase development
+      # step 3: Update development
+      - name: merge development
         run: |
           git checkout development
-          git rebase master
-          git push origin development --force
-          echo "✅ development successfully rebased"
+          git merge --no-edit upstream-sync
+          git push origin development
+          echo "✅ development successfully updated"
