@@ -29,20 +29,7 @@ jobs:
       - name: Add upstream remote
         run: |
           git remote add upstream https://github.com/torvalds/linux.git || true
+          git checkout master
           git fetch upstream
-
-      # step 2: Update upstream-sync
-      - name: merge master
-        run: |
-          git checkout upstream-sync
-          git merge --ff-only upstream/master
-          git push origin upstream-sync
-          echo "✅ upstream-sync is now aligned with master"
-
-      # step 3: Update development
-      - name: merge development
-        run: |
-          git checkout development
-          git merge --no-edit upstream-sync
-          git push origin development
-          echo "✅ development successfully updated"
+          git reset --hard upstream/master
+          git push origin master
