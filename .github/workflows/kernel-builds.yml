@@ -29,6 +29,10 @@ jobs:
             config: randconfig
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: .github/actions/kernel-ci-prepare
 
       - name: Set build env
