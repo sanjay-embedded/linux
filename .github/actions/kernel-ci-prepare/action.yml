@@ -1,0 +1,60 @@
+name: Kernel CI Prepare
+description: Prepare kernel CI environment and build tree
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Install toolchains
+      shell: bash
+      run: |
+        sudo apt update
+        sudo apt install -y \
+          gcc-aarch64-linux-gnu \
+          gcc-arm-linux-gnueabihf \
+          gcc-riscv64-linux-gnu
+
+    - name: Install CI host tools
+      shell: bash
+      run: |
+        sudo apt install -y \
+          libelf-dev \
+          libssl-dev \
+          bc \
+          flex \
+          bison \
+          lzop \
+          dwarves
+
+    - name: Fetch branches
+      shell: bash
+      run: |
+        git fetch origin master
+        git fetch origin development || true
+
+    - name: Configure git
+      shell: bash
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "actions@github.com"
+
+    - name: Prepare build tree
+      shell: bash
+      run: |
+        echo "Preparing build tree"
+
+        # create temporary branch from mirror
+        git checkout -B build-tree origin/master
+
+        # merge development (CI scripts + ML fixes)
+        if git show-ref --verify --quiet refs/remotes/origin/development; then
+          git merge --no-edit origin/development
+        fi
+
+        echo "Build tree ready"
+        git log --oneline -10
