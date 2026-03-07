@@ -29,26 +29,7 @@ jobs:
             config: randconfig
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Install toolchains
-        run: |
-          sudo apt update
-          sudo apt install -y \
-            gcc-aarch64-linux-gnu \
-            gcc-arm-linux-gnueabihf \
-            gcc-riscv64-linux-gnu
-
-      - name: Install CI host tools
-        run: |
-          sudo apt install -y \
-            libelf-dev \
-            libssl-dev \
-            bc \
-            flex \
-            bison \
-            lzop \
-            dwarves
+      - uses: ./.github/actions/kernel-ci-prepare
 
       - name: Set build env
         run: |
