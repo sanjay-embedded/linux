@@ -36,23 +36,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install toolchains
-        run: |
-          sudo apt update
-          sudo apt install -y \
-            gcc-riscv64-linux-gnu
+      - uses: ./.github/actions/kernel-ci-prepare
 
       - name: Install CI host tools
         run: |
           sudo apt install -y \
-            libelf-dev \
-            libssl-dev \
-            bc \
-            flex \
-            bison \
-            sparse \
-            lzop \
-            dwarves
+            sparse
 
       - name: Set build env
         run: |
